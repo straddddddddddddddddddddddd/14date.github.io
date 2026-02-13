@@ -90,7 +90,7 @@
     .character {
       position: absolute;
       top: 5%;
-      height: 80%;
+      height: 90%;
       width: calc(50% - 40px); /* ← фикс: 50% - зазор */
       max-width: 600px;
       display: flex;
@@ -231,7 +231,7 @@
       #splash-title { font-size: 2em; }
       #start-btn { padding: 12px 30px; font-size: 1.2em; }
 
-      .character { top: 3%; height: 70%; width: calc(50% - 30px); max-width: 450px; }
+      .character { top: 5%; height: 70%; width: calc(50% - 30px); max-width: 450px; }
       .dialog-bubble { width: 90%; bottom: 25%; padding: 20px; }
       .controls { top: 15px; right: 15px; }
 
@@ -241,9 +241,9 @@
 
     /* Адаптация при вертикальной ориентации */
     @media (orientation: portrait) and (max-width: 768px) {
-      .character { top: 2%; height: 60%; width: calc(50% - 20px); max-width: none; }
-      .character.kirill { left: 2%; }
-      .character.valeria { right: 2%; }
+      .character { top: 14%; height: 60%; width: calc(0% - 20px); max-width: none; }
+      .character.kirill { left: 5%; }
+      .character.valeria { left: 47%; }
 
       .dialog-bubble { width: 90%; bottom: 22%; max-width: none; }
       .controls { top: 10px; right: 10px; }
@@ -259,12 +259,12 @@
     /* Для очень маленьких экранов */
     @media (max-width: 480px) {
       .character {
-        width: calc(50% - 20px);
+        width: calc(50% - 5px);
         left: 2%;
         right: 2%;
       }
-      .character.kirill { left: 2%; }
-      .character.valeria { right: 2%; }
+      .character.kirill { left: 5%; }
+      .character.valeria { right: 5%; }
       .character img {
         min-height: 60vh;
       }

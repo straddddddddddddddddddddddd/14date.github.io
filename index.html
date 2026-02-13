@@ -86,13 +86,13 @@
       z-index: -1;
     }
 
-    /* УВЕЛИЧЕННЫЕ ПЕРСОНАЖИ (фиксированы сверху) */
+    /* УВЕЛИЧЕННЫЕ ПЕРСОНАЖИ (без налипания) */
     .character {
       position: absolute;
-      top: 5%; /* закреплено вверху */
-      height: 80%; /* занимает большую часть */
-      width: 45%;
-      max-width: 600px; /* увеличили */
+      top: 5%;
+      height: 80%;
+      width: calc(50% - 40px); /* ← фикс: 50% - зазор */
+      max-width: 600px;
       display: flex;
       align-items: flex-end;
       pointer-events: none;
@@ -102,11 +102,13 @@
     .character.kirill {
       left: 0;
       justify-content: flex-start;
+      z-index: 10; /* ниже */
     }
 
     .character.valeria {
       right: 0;
       justify-content: flex-end;
+      z-index: 11; /* выше */
     }
 
     .character.dim {
@@ -123,9 +125,9 @@
 
     .character img {
       width: 100%;
-      min-height: 70vh; /* фиксированная высота */
-      object-fit: cover; /* заполняет контейнер */
-      filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5)); /* увеличили тень */
+      min-height: 70vh;
+      object-fit: cover;
+      filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
     }
 
     /* УЛУЧШЕННЫЙ ДИАЛОГ */
@@ -229,7 +231,7 @@
       #splash-title { font-size: 2em; }
       #start-btn { padding: 12px 30px; font-size: 1.2em; }
 
-      .character { top: 3%; height: 70%; width: 55%; max-width: 450px; } /* ↑ размер на мобилке */
+      .character { top: 3%; height: 70%; width: calc(50% - 30px); max-width: 450px; }
       .dialog-bubble { width: 90%; bottom: 25%; padding: 20px; }
       .controls { top: 15px; right: 15px; }
 
@@ -239,9 +241,9 @@
 
     /* Адаптация при вертикальной ориентации */
     @media (orientation: portrait) and (max-width: 768px) {
-      .character { top: 2%; height: 60%; width: 100%; max-width: none; }
-      .character.kirill { left: 10%; width: 40%; }
-      .character.valeria { right: 10%; width: 40%; }
+      .character { top: 2%; height: 60%; width: calc(50% - 20px); max-width: none; }
+      .character.kirill { left: 2%; }
+      .character.valeria { right: 2%; }
 
       .dialog-bubble { width: 90%; bottom: 22%; max-width: none; }
       .controls { top: 10px; right: 10px; }
@@ -249,20 +251,20 @@
 
     /* При горизонтальной ориентации — как на десктопе */
     @media (orientation: landscape) and (max-width: 768px) {
-      .character.kirill { left: 0; width: 45%; }
-      .character.valeria { right: 0; width: 45%; }
+      .character.kirill { left: 0; width: calc(50% - 40px); }
+      .character.valeria { right: 0; width: calc(50% - 40px); }
       .dialog-bubble { width: 85%; bottom: 30%; }
     }
 
     /* Для очень маленьких экранов */
     @media (max-width: 480px) {
       .character {
-        width: 90%;
-        left: 5%;
-        right: 5%;
+        width: calc(50% - 20px);
+        left: 2%;
+        right: 2%;
       }
-      .character.kirill { left: 5%; }
-      .character.valeria { right: 5%; }
+      .character.kirill { left: 2%; }
+      .character.valeria { right: 2%; }
       .character img {
         min-height: 60vh;
       }
@@ -300,8 +302,8 @@
     // 🔧 КОНФИГУРАЦИЯ ИЗОБРАЖЕНИЙ
     const IMAGE_CONFIG = {
       backgroundUrl: "https://i.postimg.cc/QNcf3cVn/image-    (2).jpg",
-      kirillUrl: "https://i.postimg.cc/jj8w7xvW/photo-2026-02-13-20-27-41-7606402809386237960-1.png",
-      valeriaUrl: "https://i.postimg.cc/44jcP3GF/photo-2026-02-13-01-02-49-7606102625531985932-1.png    "
+      kirillUrl: "https://i.postimg.cc/65TH2q08/photo-2026-02-13-20-27-41-7606402809386237960-1.png  ",
+      valeriaUrl: "https://i.postimg.cc/90gJgHWr/photo-2026-02-13-01-02-49-7606102625531985932-1.png  "
     };
 
     // Диалог: разбит на короткие тейки с множеством реплик Валерии

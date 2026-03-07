@@ -1,691 +1,949 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-  <title>Клуб романтики</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Two Egos</title>
+    <style>
+        :root {
+            --bg-app: #1a1d24;
+            --bg-header: #252933;
+            --text-primary: #FFFFFF;
+            --text-secondary: #AFB0B4;
+            --text-time: rgba(255, 255, 255, 0.5);
+            
+            --kirill-color: linear-gradient(90deg, #00C6FF 0%, #0072FF 100%);
+            --lera-color: linear-gradient(90deg, #FF512F 0%, #DD2476 100%);
+            
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
 
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      background: #0a0a1a;
-      color: #f0f0f5;
-    }
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: var(--font-main);
+        }
 
-    /* ЗАСТАВКА */
-    #splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, #0a0a1a, #1a1a2e);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      transition: opacity 0.8s ease, visibility 0.8s ease;
-    }
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background-color: var(--bg-app);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            border: 8px solid #333;
+            transition: filter 0.5s;
+        }
 
-    #splash-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
+        .phone-frame.blocked {
+            filter: grayscale(100%) blur(2px);
+        }
 
-    #splash-title {
-      font-size: 2.5em;
-      font-weight: bold;
-      color: #ffb6c1;
-      margin-bottom: 30px;
-      text-align: center;
-      text-shadow: 0 0 10px rgba(255, 182, 193, 0.5);
-    }
+        /* ===== ГЛАВНОЕ МЕНЮ ===== */
+        .main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1d24 0%, #0d0f12 100%);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            transition: opacity 0.5s, transform 0.5s;
+        }
 
-    #start-btn {
-      padding: 15px 40px;
-      font-size: 1.4em;
-      background: linear-gradient(to right, #d4af37, #d789a6);
-      border: none;
-      border-radius: 50px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+        .main-menu.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
 
-    #start-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 25px rgba(215, 137, 166, 0.6);
-    }
+        .game-logo {
+            font-size: 42px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
 
-    /* ОСНОВНОЙ КОНТЕНТ */
-    #main-content {
-      display: none;
-    }
+        .game-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
 
-    #main-content.active {
-      display: block;
-    }
+        .menu-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80') center/cover;
+            margin-bottom: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
 
-    #background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('') no-repeat center center/cover;
-      z-index: -1;
-    }
+        .start-btn {
+            width: 280px;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.4);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
-    /* УВЕЛИЧЕННЫЕ ПЕРСОНАЖИ (без налипания) */
-    .character {
-      position: absolute;
-      top: 5%;
-      height: 90%;
-      width: calc(50% - 40px); /* ← фикс: 50% - зазор */
-      max-width: 600px;
-      display: flex;
-      align-items: flex-end;
-      pointer-events: none;
-      transition: opacity 0.4s ease, transform 0.3s ease;
-    }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 198, 255, 0.6);
+        }
 
-    .character.kirill {
-      left: 0;
-      justify-content: flex-start;
-      z-index: 10; /* ниже */
-    }
+        .start-btn:active {
+            transform: translateY(0);
+        }
 
-    .character.valeria {
-      right: 0;
-      justify-content: flex-end;
-      z-index: 11; /* выше */
-    }
+        .menu-info {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.6;
+        }
 
-    .character.dim {
-      opacity: 0.3;
-      filter: grayscale(70%) brightness(0.6);
-      transform: scale(0.98);
-    }
+        .menu-info span {
+            display: block;
+            margin: 5px 0;
+        }
 
-    .character.lit {
-      opacity: 1;
-      filter: none;
-      transform: scale(1.02);
-    }
+        /* ===== ОСТАЛЬНЫЕ СТИЛИ ИГРЫ ===== */
+        .status-bar {
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10;
+        }
 
-    .character img {
-      width: 100%;
-      min-height: 70vh;
-      object-fit: cover;
-      filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5));
-    }
+        .chat-header {
+            padding: 10px 16px;
+            background: rgba(37, 41, 51, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+            position: relative;
+        }
 
-    /* УЛУЧШЕННЫЙ ДИАЛОГ */
-    .dialog-bubble {
-      position: absolute;
-      left: 50%;
-      bottom: 30%; /* ↑ поднято, чтобы не перекрывалось */
-      transform: translateX(-50%);
-      width: 85%;
-      max-width: 600px;
-      background: rgba(20, 20, 35, 0.94);
-      border-radius: 22px;
-      padding: 24px 20px;
-      box-shadow: 
-        0 10px 40px rgba(0, 0, 0, 0.6),
-        0 0 20px rgba(255, 215, 0, 0.15);
-      border: 1px solid rgba(100, 100, 150, 0.5);
-      backdrop-filter: blur(8px);
-      z-index: 15;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+        .back-btn { color: white; font-size: 24px; margin-right: 10px; cursor: pointer; }
+        
+        .avatar-container {
+            position: relative;
+            width: 40px; height: 40px;
+            margin-right: 12px;
+        }
+        
+        .avatar {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80') center/cover;
+            transition: filter 0.3s;
+        }
 
-    .speaker-name {
-      font-size: 1.3em;
-      font-weight: bold;
-      color: #ffb6c1;
-      text-align: center;
-      margin-bottom: 12px;
-      padding: 8px 14px;
-      background: rgba(30, 30, 50, 0.8);
-      border-radius: 14px;
-      display: inline-block;
-    }
+        .blocked-icon {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
 
-    .dialog-text {
-      font-size: 1.2em;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+        .phone-frame.blocked .blocked-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
 
-    .dialog-text em {
-      color: #d4af37;
-      font-style: italic;
-    }
+        .header-info h1 { color: white; font-size: 18px; font-weight: 600; }
+        .header-info span { color: #4CD964; font-size: 12px; transition: color 0.3s; }
+        .phone-frame.blocked .header-info span { color: #ff4444; }
 
-    .controls {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 12px;
-      z-index: 20;
-    }
+        .chat-area {
+            flex: 1;
+            padding: 20px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+        .chat-area::-webkit-scrollbar { display: none; }
 
-    .control-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(30, 30, 45, 0.85);
-      border: 1px solid rgba(100, 100, 150, 0.5);
-      color: #e0e0ff;
-      font-size: 1.4em;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
+        .message-row {
+            display: flex; flex-direction: column; max-width: 85%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
-    .choice-btn {
-      background: rgba(60, 60, 90, 0.8);
-      color: #e0e0ff;
-      border: 1px solid rgba(100, 100, 150, 0.4);
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 1em;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.3s ease;
-    }
+        .message-row.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-    .choices {
-      margin-top: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+        .message-row.sent { align-self: flex-end; align-items: flex-end; }
+        .message-row.received { align-self: flex-start; align-items: flex-start; }
+        .message-row.image-msg { max-width: 70%; }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .sender-name { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; margin-left: 4px; }
+        
+        .bubble {
+            padding: 12px 16px; border-radius: 18px; color: white; font-size: 15px; line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            word-wrap: break-word;
+        }
+        .bubble.sent { border-bottom-right-radius: 4px; background: var(--kirill-color); }
+        .bubble.received { border-bottom-left-radius: 4px; background: var(--lera-color); }
+        
+        .bubble img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 5px;
+            display: block;
+        }
 
-    .dialog-bubble {
-      animation: fadeInUp 0.6s ease-out;
-    }
+        .time { font-size: 10px; color: var(--text-time); margin-top: 4px; display: block; }
+        .message-row.sent .time { text-align: right; }
+        .message-row.received .time { text-align: left; margin-left: 4px; }
 
-    /* Мобильная адаптация */
-    @media (max-width: 768px) {
-      #splash-title { font-size: 2em; }
-      #start-btn { padding: 12px 30px; font-size: 1.2em; }
+        .footer {
+            padding: 16px; background: var(--bg-header);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            min-height: 80px; display: flex; align-items: center; justify-content: center;
+            position: relative;
+            z-index: 20;
+        }
 
-      .character { top: 5%; height: 70%; width: calc(50% - 30px); max-width: 450px; }
-      .dialog-bubble { width: 90%; bottom: 25%; padding: 20px; }
-      .controls { top: 15px; right: 15px; }
+        .input-bar {
+            width: 100%; height: 44px; background: rgba(255,255,255,0.1);
+            border-radius: 22px; display: flex; align-items: center; padding: 0 16px;
+            opacity: 0.5; pointer-events: none;
+        }
 
-      .dialog-text { font-size: 1.1em; line-height: 1.5; }
-      .speaker-name { font-size: 1.2em; }
-    }
+        .choices-container {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: var(--bg-header); padding: 20px 16px 30px 16px;
+            display: flex; flex-direction: column; gap: 12px;
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            z-index: 20;
+        }
+        .choices-container.active { transform: translateY(0); }
 
-    /* Адаптация при вертикальной ориентации */
-    @media (orientation: portrait) and (max-width: 768px) {
-      .character { top: 14%; height: 60%; width: calc(0% - 20px); max-width: none; }
-      .character.kirill { left: 5%; }
-      .character.valeria { left: 47%; }
+        .choice-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 14px; border-radius: 12px; font-size: 13px;
+            cursor: pointer; transition: all 0.2s; text-align: left; position: relative;
+            font-family: var(--font-main);
+            line-height: 1.3;
+        }
+        .choice-btn:hover { background: rgba(255,255,255,0.1); border-color: white; }
+        
+        .choice-btn.premium { border: 1px solid #4A90E2; color: #4A90E2; background: rgba(74, 144, 226, 0.05); }
+        .choice-desc { font-size: 11px; opacity: 0.7; display: block; margin-top: 4px; }
 
-      .dialog-bubble { width: 90%; bottom: 22%; max-width: none; }
-      .controls { top: 10px; right: 10px; }
-    }
+        .typing-indicator {
+            font-size: 12px; color: var(--text-secondary); margin-left: 10px; margin-bottom: 10px;
+            display: none; font-style: italic; padding-left: 16px;
+        }
 
-    /* При горизонтальной ориентации — как на десктопе */
-    @media (orientation: landscape) and (max-width: 768px) {
-      .character.kirill { left: 0; width: calc(50% - 40px); }
-      .character.valeria { right: 0; width: calc(50% - 40px); }
-      .dialog-bubble { width: 85%; bottom: 30%; }
-    }
+        .block-screen-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
 
-    /* Для очень маленьких экранов */
-    @media (max-width: 480px) {
-      .character {
-        width: calc(50% - 5px);
-        left: 2%;
-        right: 2%;
-      }
-      .character.kirill { left: 5%; }
-      .character.valeria { right: 5%; }
-      .character img {
-        min-height: 60vh;
-      }
-    }
-  </style>
+        .phone-frame.blocked .block-screen-overlay {
+            display: flex;
+        }
+
+        .block-icon-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.4);
+        }
+
+        .block-icon-large span {
+            font-size: 40px;
+        }
+
+        .block-title-large {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff4444;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .block-reason-large {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            max-width: 300px;
+        }
+
+        .restart-btn-large {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .restart-btn-large:active {
+            transform: scale(0.95);
+        }
+
+        .final-stats {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 29, 36, 0.95);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .final-stats.visible { display: flex; }
+        .stat-item { font-size: 18px; margin: 10px 0; color: #fff; }
+        .stat-val { color: #4A90E2; font-weight: bold; }
+        .achievement { margin-top: 30px; padding: 15px; border: 1px solid #4A90E2; border-radius: 10px; color: #4A90E2; }
+
+    </style>
 </head>
 <body>
-  <!-- ЗАСТАВКА -->
-  <div id="splash-screen">
-    <h1 id="splash-title">DATE<br>14/02/2026</h1>
-    <button id="start-btn">Начать</button>
-  </div>
 
-  <!-- ОСНОВНОЙ КОНТЕНТ -->
-  <div id="main-content">
-    <div id="background"></div>
-    <div id="kirill" class="character kirill">
-      <img id="kirill-img" alt="Кирилл">
+    <div class="phone-frame" id="phoneFrame">
+        
+        <!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
+        <div class="main-menu" id="mainMenu">
+            <div class="menu-avatar"></div>
+            <div class="game-logo">Part 2</div>
+            <div class="game-subtitle">08\03\2026</div>
+            
+            <button class="start-btn" onclick="startGame()">Начать игру</button>
+            
+           
+        </div>
+        
+        <!-- ===== ИГРОВОЙ ИНТЕРФЕЙС ===== -->
+        <div class="status-bar">
+            <span id="clock">14:15</span>
+            <div style="display: flex; gap: 5px;"><span>📶</span><span>🔋</span></div>
+        </div>
+
+        <div class="chat-header">
+            <div class="back-btn">‹</div>
+            <div class="avatar-container">
+                <div class="avatar"></div>
+                <div class="blocked-icon">🚫</div>
+            </div>
+            <div class="header-info">
+                <h1>Lera</h1>
+                <span id="statusText">Online</span>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">Lera печатает...</div>
+
+        <div class="block-screen-overlay" id="blockOverlay">
+            <div class="block-icon-large">
+                <span>🚫</span>
+            </div>
+            <div class="block-title-large">Вы заблокированы</div>
+            <div class="block-reason-large" id="blockReason">Лера не терпит неопределенности. Вы потеряли её интерес.</div>
+            <button class="restart-btn-large" onclick="location.reload()">Начать заново</button>
+        </div>
+
+        <div class="final-stats" id="finalStats">
+            <h2 style="color:white; margin-bottom: 20px;">Свидание назначено</h2>
+            <div class="stat-item">💖 Влечение: <span class="stat-val" id="statLove">0</span></div>
+            <div class="stat-item">😎 Эго: <span class="stat-val" id="statEgo">0</span></div>
+            <div class="stat-item">💎 Потрачено: <span class="stat-val" id="statDiamonds">0</span></div>
+            <div class="achievement" id="achievementBox">Достижение: Баланс Эго</div>
+            <button class="restart-btn-large" style="margin-top: 30px;" onclick="location.reload()">В меню</button>
+        </div>
+
+        <div class="footer">
+            <div class="input-bar">
+                <div style="color:white; font-size: 20px;">+</div>
+                <input type="text" placeholder="Message" disabled>
+                <div style="color:white;">➤</div>
+            </div>
+
+            <div class="choices-container" id="choicesContainer">
+            </div>
+        </div>
     </div>
-    <div id="valeria" class="character valeria">
-      <img id="valeria-img" alt="Валерия">
-    </div>
-    <div id="dialog-bubble" class="dialog-bubble">
-      <div id="speaker-name" class="speaker-name">Кирилл</div>
-      <div id="dialog-text" class="dialog-text">Загрузка...</div>
-      <div id="choices" class="choices"></div>
-    </div>
-    <div id="controls" class="controls">
-      <button id="btn-back" class="control-btn">←</button>
-      <button id="btn-pause" class="control-btn">⏸</button>
-    </div>
-  </div>
 
-  <script>
-    // 🔧 КОНФИГУРАЦИЯ ИЗОБРАЖЕНИЙ
-    const IMAGE_CONFIG = {
-      backgroundUrl: "https://i.postimg.cc/QNcf3cVn/image-    (2).jpg",
-      kirillUrl: "https://i.postimg.cc/65TH2q08/photo-2026-02-13-20-27-41-7606402809386237960-1.png  ",
-      valeriaUrl: "https://i.postimg.cc/90gJgHWr/photo-2026-02-13-01-02-49-7606102625531985932-1.png  "
-    };
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const choicesContainer = document.getElementById('choicesContainer');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const phoneFrame = document.getElementById('phoneFrame');
+        const statusText = document.getElementById('statusText');
+        const blockReasonText = document.getElementById('blockReason');
+        const clock = document.getElementById('clock');
+        const finalStatsScreen = document.getElementById('finalStats');
+        const mainMenu = document.getElementById('mainMenu'); // Главное меню
 
-      // Вариант 1.1: Язвительно
-      const dialogueTree = [
-  { id: 0, speaker: "Кирилл", actionText: "подходит медленно, не нарушая её пространства", text: "Ты выбираешь места так, будто проверяешь: выдержит ли мир твоё одиночество." },
-  { id: 1, speaker: "Кирилл", text: "Или ты проверяешь себя — сможешь ли ты выдержать мир без него?" },
-  { id: 2, speaker: "Валерия", actionText: "не оборачиваясь, пальцы скользят по стеклу окна", text: "Мир выдержит всё. Вопрос в том, выдержу ли я скуку тех, кто пытается меня завоевать." },
-  { id: 3, speaker: "Валерия", text: "А ты — очередной кандидат или просто проходил мимо и не удержался?" },
-  { id: 4, speaker: "Кирилл", actionText: "прислоняется к оконной раме рядом, не касаясь её", text: "Природа щедра ко мне. Но к тебе она проявила изобретательность." },
-  { id: 5, speaker: "Кирилл", text: "Взгляни — город за стеклом. Все эти огни, миллионы жизней…" },
-  { id: 6, speaker: "Кирилл", text: "И лишь один отсвет в этом стекле достоин того, чтобы я посмотрел дважды. Твой." },
-  { id: 7, speaker: "Валерия", actionText: "проводит ногтем по конденсату на стекле, рисуя линию между их отражениями", text: "Отсвет… Как поэтично для человека, который, судя по запястью, носит часы за пятьдесят тысяч." },
-  { id: 8, speaker: "Валерия", text: "Ты покупаешь время или продаёшь иллюзию, что контролируешь его?" },
-  { id: 9, speaker: "Валерия", text: "Или просто не можешь удержаться от красивых фраз, даже когда молчание было бы уместнее?" },
+        let messageQueue = [];
+        let isProcessing = false;
+        let stats = { love: 0, ego: 0, diamonds: 0 };
+        let choiceHistory = [];
+        let lastChoiceType = '';
+        let lastChoiceText = "";
 
-  // 🔸 ТОЧКА ВЫБОРА 1
-  {
-    id: 10,
-    type: "choice",
-    text: "Что скажешь ему?",
-    choices: [
-      { label: "«Как мило. Ты видишь отсвет и называешь это судьбой. А я вижу отражение человека, который слишком долго смотрел на себя и теперь путает тени с глубиной.»", path: "path1_1" },
-      { label: "«Отсвет?» проводит пальцем по краю бокала «А что ты увидишь, когда отражение исчезнет и останется только тепло кожи? Или ты боишься смотреть без стекла между нами?»", path: "path1_2" },
-      { label: "«Значит, я — единственный достойный отсвет? Какая ответственность. Теперь мне придётся сиять ярче, чтобы оправдать твою поэзию. А вдруг я устану?»", path: "path1_3" }
-    ]
-  },
-
-  // Вариант 1.1: Язвительно
-  { id: 11, path: "path1_1", speaker: "Кирилл", actionText: "смеётся — без обиды, с искренним восхищением", text: "Ты колешь, чтобы проверить: потечёт ли кровь или масло?" },
-  { id: 12, path: "path1_1", speaker: "Кирилл", text: "Уверяю, я не машина. Но и не мальчик, который расплачется от первого же шипа." },
-  { id: 13, path: "path1_1", speaker: "Кирилл", text: "Я ценю остроту — особенно когда она исходит от ума, а не от страха." },
-  { id: 14, path: "path1_1", speaker: "Валерия", text: "Страха? Ты думаешь, я боюсь тебя?" },
-  { id: 15, path: "path1_1", speaker: "Валерия", actionText: "берёт бокал, делает глоток, не отводя взгляда", text: "Я не боюсь тебя. Я боюсь скуки." },
-  { id: 16, path: "path1_1", speaker: "Валерия", text: "А ты пока не доказал, что не принесёшь её в мою жизнь." },
-  { id: 17, path: "path1_1", speaker: "Валерия", text: "Так что давай проверим: ты огонь или просто искра?" },
-  { id: 18, path: "path1_1", speaker: "Кирилл", text: "Нет. Ты боишься того, что перестанешь бояться. А это куда опаснее." },
-  { id: 19, path: "path1_1", speaker: "Кирилл", actionText: "Делает шаг ближе. Расстояние между ними сокращается до одного дыхания.", text: "До тебя я видел красивых — но они хотели быть мной." },
-  { id: 20, path: "path1_1", speaker: "Кирилл", text: "Умных — но они хотели обладать мной." },
-  { id: 21, path: "path1_1", speaker: "Кирилл", text: "А ты… ты смотришь на меня так, будто я — зеркало, в котором тебе наконец интересно изучить собственное отражение." },
-  { id: 22, path: "path1_1", speaker: "Кирилл", text: "Не чтобы любоваться. Чтобы проверить: выдержу ли я твою глубину." },
-  { id: 23, path: "path1_1", speaker: "Валерия", actionText: "ставит бокал на подоконник с точным, почти хирургическим движением", text: "Зеркала лгут. Они показывают только то, что перед ними." },
-  { id: 24, path: "path1_1", speaker: "Валерия", text: "А ты даже не представляешь, что скрыто за моими глазами. Или не хочешь представлять?" },
-
-  // Вариант 1.2: Сексуально
-  { id: 25, path: "path1_2", speaker: "Кирилл", actionText: "его взгляд опускается на её пальцы, затем возвращается к глазам", text: "Стекло… зеркала… рамки." },
-  { id: 26, path: "path1_2", speaker: "Кирилл", text: "Всё это для тех, кто не готов увидеть правду без фильтров. А я готов." },
-  { id: 27, path: "path1_2", speaker: "Кирилл", text: "Вопрос в том — готова ли ты?" },
-  { id: 28, path: "path1_2", speaker: "Валерия", text: "Готовность — для тех, кто сомневается." },
-  { id: 29, path: "path1_2", speaker: "Валерия", text: "Я либо хочу, либо ухожу." },
-  { id: 30, path: "path1_2", speaker: "Валерия", text: "Промежуточных состояний не бывает." },
-  { id: 31, path: "path1_2", speaker: "Валерия", actionText: "наклоняется чуть ближе, голос падает до шёпота", text: "Так что ответь честно: ты хочешь или просто играешь?" },
-  { id: 32, path: "path1_2", speaker: "Кирилл", text: "Тогда скажи: ты хочешь или уйдёшь?" },
-  { id: 33, path: "path1_2", speaker: "Валерия", text: "Я остаюсь. Но не потому что хочу тебя." },
-  { id: 34, path: "path1_2", speaker: "Валерия", text: "А потому что ты — интересный эксперимент." },
-  { id: 35, path: "path1_2", speaker: "Валерия", text: "И эксперименты требуют наблюдения." },
-  { id: 36, path: "path1_2", speaker: "Валерия", text: "Так что наблюдай. И постарайся не разочаровать меня." },
-  { id: 37, path: "path1_2", speaker: "Кирилл", actionText: "Делает шаг ближе. Расстояние между ними сокращается до одного дыхания.", text: "До тебя я видел красивых — но они хотели быть мной." },
-  { id: 38, path: "path1_2", speaker: "Кирилл", text: "Умных — но они хотели обладать мной." },
-  { id: 39, path: "path1_2", speaker: "Кирилл", text: "А ты… ты смотришь на меня так, будто я — зеркало, в котором тебе наконец интересно изучить собственное отражение." },
-  { id: 40, path: "path1_2", speaker: "Кирилл", text: "Не чтобы любоваться. Чтобы проверить: выдержу ли я твою глубину." },
-  { id: 41, path: "path1_2", speaker: "Валерия", actionText: "улыбается без иронии — впервые", text: "Глубина? А что, если за этими глазами — не глубина, а пропасть?" },
-  { id: 42, path: "path1_2", speaker: "Валерия", text: "И ты уже сделал шаг вперёд, даже не заметив края?" },
-
-  // Вариант 1.3: Остроумно
-  { id: 43, path: "path1_3", speaker: "Кирилл", actionText: "наклоняет голову, изучающе", text: "Устанешь? Нет." },
-  { id: 44, path: "path1_3", speaker: "Кирилл", text: "Ты не из тех, кто устаёт от сияния." },
-  { id: 45, path: "path1_3", speaker: "Кирилл", text: "Ты из тех, кто устаёт от тусклых источников света вокруг." },
-  { id: 46, path: "path1_3", speaker: "Кирилл", text: "И вот я здесь — не тусклый." },
-  { id: 47, path: "path1_3", speaker: "Кирилл", text: "Не проси меня притушить себя. Лучше признай: тебе нравится этот свет." },
-  { id: 48, path: "path1_3", speaker: "Валерия", text: "Нравится — слишком слабое слово для того, что я чувствую к достойным соперникам." },
-  { id: 49, path: "path1_3", speaker: "Валерия", actionText: "берёт его руку, изучает ладонь", text: "Соперник? Как банально. Мы не на ринге." },
-  { id: 50, path: "path1_3", speaker: "Валерия", text: "Мы на танцполе. И музыка уже играет — ты просто делаешь вид, что не слышишь ритм." },
-  { id: 51, path: "path1_3", speaker: "Валерия", text: "Или, может, ты просто не умеешь танцевать?" },
-  { id: 52, path: "path1_3", speaker: "Кирилл", actionText: "Соперник? усмехается", text: "Мы не на ринге. Мы на танцполе." },
-  { id: 53, path: "path1_3", speaker: "Кирилл", text: "И музыка уже играет — ты просто делаешь вид, что не слышишь ритм." },
-  { id: 54, path: "path1_3", speaker: "Кирилл", actionText: "Делает шаг ближе. Расстояние между ними сокращается до одного дыхания.", text: "До тебя я видел красивых — но они хотели быть мной." },
-  { id: 55, path: "path1_3", speaker: "Кирилл", text: "Умных — но они хотели обладать мной." },
-  { id: 56, path: "path1_3", speaker: "Кирилл", text: "А ты… ты смотришь на меня так, будто я — зеркало, в котором тебе наконец интересно изучить собственное отражение." },
-  { id: 57, path: "path1_3", speaker: "Кирилл", text: "Не чтобы любоваться. Чтобы проверить: выдержу ли я твою глубину." },
-  { id: 58, path: "path1_3", speaker: "Валерия", actionText: "отпускает его руку", text: "Проверка глубины — дело рискованное." },
-  { id: 59, path: "path1_3", speaker: "Валерия", text: "Вдруг окажется, что твоё эхо в моей глубине звучит громче, чем ты сам?" },
-  { id: 60, path: "path1_3", speaker: "Валерия", text: "Представь: ты крикнешь «я прекрасен» — а вернётся «я прекраснее»." },
-
-  // 🔸 ТОЧКА ВЫБОРА 2
-  {
-    id: 61,
-    type: "choice",
-    text: "Что скажешь ему?",
-    choices: [
-      { label: "«Зеркало? Как банально. Зеркала лгут — они показывают только то, что перед ними. А ты даже не представляешь, что скрыто за моими глазами. Или не хочешь представлять?»", path: "path2_1" },
-      { label: "«Глубина?» наклоняется чуть ближе, голос падает до шёпота «А что, если за этими глазами — не глубина, а пропасть? И ты уже сделал шаг вперёд, даже не заметив края?»", path: "path2_2" },
-      { label: "«Проверка глубины — дело рискованное. Вдруг окажется, что твоё эхо в моей глубине звучит громче, чем ты сам? Представь: ты крикнешь «я прекрасен» — а вернётся «я прекраснее».»", path: "path2_3" }
-    ]
-  },
-
-  // Вариант 2.1: Язвительно
-  { id: 62, path: "path2_1", speaker: "Кирилл", actionText: "Пусть лгут. Я не ищу правды в зеркалах — я создаю её. А ты… ты первая, кого я хочу создать вместе с собой. Не отдельно. Не рядом. А в унисон.", text: "" },
-  { id: 63, path: "path2_1", speaker: "Валерия", text: "Унисон — для хора. Мы с тобой не поём. Мы заставляем других молчать." },
-  { id: 64, path: "path2_1", speaker: "Валерия", actionText: "поворачивается к окну, отражение в стекле", text: "И я не хочу молчать. Я хочу, чтобы молчали все остальные." },
-  { id: 65, path: "path2_1", speaker: "Кирилл", actionText: "Берёт её бокал, ставит на подоконник. Его пальцы задерживаются рядом с её рукой — не касаясь, но обещая.", text: "Ты всю жизнь учила мир восхищаться тобой на расстоянии." },
-  { id: 66, path: "path2_1", speaker: "Кирилл", text: "А я хочу увидеть тебя там, где нет зеркал." },
-  { id: 67, path: "path2_1", speaker: "Кирилл", text: "Где отражение — только в моих глазах." },
-  { id: 68, path: "path2_1", speaker: "Кирилл", text: "Где ты не можешь спрятаться за улыбкой или остроумием." },
-  { id: 69, path: "path2_1", speaker: "Кирилл", text: "Где остаётся только… ты. И я." },
-  { id: 70, path: "path2_1", speaker: "Валерия", actionText: "не отстраняется. Смотрит на его руку, затем в глаза", text: "Без зеркал? Как жестоко." },
-  { id: 71, path: "path2_1", speaker: "Валерия", text: "Ты уверен, что выдержишь правду без возможности полюбоваться собой в процессе?" },
-
-  // Вариант 2.2: Сексуально
-  { id: 72, path: "path2_2", speaker: "Кирилл", actionText: "не отступает, его дыхание касается её щеки", text: "Пропасть? Отлично." },
-  { id: 73, path: "path2_2", speaker: "Кирилл", text: "Я всегда хотел узнать, каково это — падать без желания остановиться." },
-  { id: 74, path: "path2_2", speaker: "Кирилл", text: "Особенно если на дне ждёт не боль, а… ты." },
-  { id: 75, path: "path2_2", speaker: "Валерия", text: "На дне обычно тьма. Но для тебя я сделаю исключение — оставлю одну свечу." },
-  { id: 76, path: "path2_2", speaker: "Валерия", text: "Чтобы ты видел, куда падаешь." },
-  { id: 77, path: "path2_2", speaker: "Валерия", actionText: "проводит пальцем по его губам", text: "Или, может, ты хочешь падать вслепую? Без оглядки?" },
-  { id: 78, path: "path2_2", speaker: "Валерия", text: "Некоторые мужчины любят риск. Но ты… ты любишь контроль. Признай." },
-  { id: 79, path: "path2_2", speaker: "Кирилл", actionText: "Берёт её бокал, ставит на подоконник. Его пальцы задерживаются рядом с её рукой — не касаясь, но обещая.", text: "Ты всю жизнь учила мир восхищаться тобой на расстоянии." },
-  { id: 80, path: "path2_2", speaker: "Кирилл", text: "А я хочу увидеть тебя там, где нет зеркал." },
-  { id: 81, path: "path2_2", speaker: "Кирилл", text: "Где отражение — только в моих глазах." },
-  { id: 82, path: "path2_2", speaker: "Кирилл", text: "Где ты не можешь спрятаться за улыбкой или остроумием." },
-  { id: 83, path: "path2_2", speaker: "Кирилл", text: "Где остаётся только… ты. И я." },
-  { id: 84, path: "path2_2", speaker: "Валерия", actionText: "голос чуть хриплее", text: "Мои глаза закроются в самый интересный момент." },
-  { id: 85, path: "path2_2", speaker: "Валерия", text: "И тогда тебе придётся найти способ удержать меня без зрелища." },
-  { id: 86, path: "path2_2", speaker: "Валерия", text: "Только прикосновением. Только дыханием. Справишься?" },
-
-  // Вариант 2.3: Остроумно
-  { id: 87, path: "path2_3", speaker: "Кирилл", actionText: "смеётся тихо, почти шёпотом", text: "Тогда крикни первой." },
-  { id: 88, path: "path2_3", speaker: "Кирилл", text: "Посмотрим, чьё эхо переживёт рассвет." },
-  { id: 89, path: "path2_3", speaker: "Кирилл", text: "Хотя… зачем кричать? Есть способы проверить глубину без слов." },
-  { id: 90, path: "path2_3", speaker: "Кирилл", text: "Гораздо более… личные." },
-  { id: 91, path: "path2_3", speaker: "Валерия", text: "Личные? Опасное слово для человека, который до сих пор говорит, а не действует." },
-  { id: 92, path: "path2_3", speaker: "Валерия", actionText: "наклоняется к нему, почти касаясь", text: "Слова — это для тех, кто боится прикосновений." },
-  { id: 93, path: "path2_3", speaker: "Валерия", text: "А ты? Ты боишься?" },
-  { id: 94, path: "path2_3", speaker: "Кирилл", actionText: "Берёт её бокал, ставит на подоконник. Его пальцы задерживаются рядом с её рукой — не касаясь, но обещая.", text: "Ты всю жизнь учила мир восхищаться тобой на расстоянии." },
-  { id: 95, path: "path2_3", speaker: "Кирилл", text: "А я хочу увидеть тебя там, где нет зеркал." },
-  { id: 96, path: "path2_3", speaker: "Кирилл", text: "Где отражение — только в моих глазах." },
-  { id: 97, path: "path2_3", speaker: "Кирилл", text: "Где ты не можешь спрятаться за улыбкой или остроумием." },
-  { id: 98, path: "path2_3", speaker: "Кирилл", text: "Где остаётся только… ты. И я." },
-  { id: 99, path: "path2_3", speaker: "Валерия", actionText: "долго смотрит на него", text: "Без зеркал — значит, без подтверждения собственной красоты?" },
-  { id: 100, path: "path2_3", speaker: "Валерия", text: "Кирилл, ты предлагаешь мне самый дерзкий эксперимент в моей жизни: довериться чужому взгляду." },
-  { id: 101, path: "path2_3", speaker: "Валерия", text: "Почти романтично. Почти глупо." },
-
-  // 🔸 ТОЧКА ВЫБОРА 3
-  {
-    id: 102,
-    type: "choice",
-    text: "Что скажешь ему?",
-    choices: [
-      { label: "«Без зеркал? Как жестоко. Ты уверен, что выдержишь правду без возможности полюбоваться собой в процессе?»", path: "path3_1" },
-      { label: "«Мои глаза закроются в самый интересный момент. И тогда тебе придётся найти способ удержать меня без зрелища. Только прикосновением. Только дыханием. Справишься?»", path: "path3_2" },
-      { label: "«Без зеркал — значит, без подтверждения собственной красоты? Кирилл, ты предлагаешь мне самый дерзкий эксперимент в моей жизни: довериться чужому взгляду. Почти романтично. Почти глупо.»", path: "path3_3" }
-    ]
-  },
-
-  // Вариант 3.1: Язвительно
-  { id: 103, path: "path3_1", speaker: "Кирилл", actionText: "Я не нуждаюсь в зеркалах, чтобы знать, кто я. Мне достаточно твоего взгляда — когда ты наконец перестанешь прятать восхищение за колкостями. Оно там. Я вижу.", text: "" },
-  { id: 104, path: "path3_1", speaker: "Валерия", actionText: "впервые без усмешки", text: "Не ищи там того, чего нет." },
-  { id: 105, path: "path3_1", speaker: "Валерия", text: "Восхищение — это слабость. А я не слаба." },
-  { id: 106, path: "path3_1", speaker: "Валерия", text: "Я… избирательна. Вот и всё." },
-  { id: 107, path: "path3_1", speaker: "Кирилл", text: "Я ищу то, что ты сама боишься найти." },
-
-  // Вариант 3.2: Сексуально
-  { id: 108, path: "path3_2", speaker: "Кирилл", actionText: "его пальцы накрывают её запястье — мягко, но уверенно", text: "Прикосновение… дыхание… голос падает до шёпота" },
-  { id: 109, path: "path3_2", speaker: "Кирилл", text: "Я удержу тебя не руками." },
-  { id: 110, path: "path3_2", speaker: "Кирилл", text: "Я удержу тебя желанием — твоим и моим, сплетёнными так тесно, что ты забудешь, где кончается одно и начинается другое." },
-  { id: 111, path: "path3_2", speaker: "Валерия", text: "Забыть себя — не в моих правилах." },
-  { id: 112, path: "path3_2", speaker: "Валерия", actionText: "но не отстраняется", text: "Но… правила созданы, чтобы их нарушать." },
-  { id: 113, path: "path3_2", speaker: "Валерия", text: "Особенно в темноте. Особенно под луной." },
-  { id: 114, path: "path3_2", speaker: "Кирилл", text: "Правила созданы, чтобы их нарушать. Особенно в темноте. Особенно под луной." },
-
-  // Вариант 3.3: Остроумно
-  { id: 115, path: "path3_3", speaker: "Кирилл", actionText: "Глупо? Возможно. Но величайшие открытия всегда начинались с безумия. А я предлагаю тебе открыть нечто… первозданное. Два эго, снявшие доспехи. Без публики. Без аплодисментов. Только ночь и двое тех, кто слишком долго был один, чтобы признать это вслух.", text: "" },
-  { id: 116, path: "path3_3", speaker: "Валерия", text: "Первозданное? Ты романтик под маской циника." },
-  { id: 117, path: "path3_3", speaker: "Валерия", actionText: "улыбается — впервые искренне", text: "А я — циник под маской романтика." },
-  { id: 118, path: "path3_3", speaker: "Валерия", text: "Признаюсь тебе в этом на пляже?" },
-  { id: 119, path: "path3_3", speaker: "Кирилл", text: "А ты — циник под маской романтика. Признаешься мне в этом на пляже?" },
-
-  // 🔸 ФИНАЛЬНОЕ ПРЕДЛОЖЕНИЕ
-  { id: 120, speaker: "Кирилл", actionText: "берёт её руку, подносит к губам — не целует, лишь держит", text: "За этим городом — пляж. Чёрный песок, луна на воде, ни души до самого горизонта." },
-  { id: 121, speaker: "Кирилл", text: "Я не предлагаю тебе ресторан с белыми скатертями и официантами, которые запомнят твоё имя." },
-  { id: 122, speaker: "Кирилл", text: "Я предлагаю тебе ночь без свидетелей." },
-  { id: 123, speaker: "Кирилл", text: "Где единственное, что коснётся твоей кожи, — это мои руки и прохлада прибоя." },
-  { id: 124, speaker: "Кирилл", text: "Где ты не будешь думать о том, как выглядишь. Ты будешь чувствовать — каково это, быть желанной не за корону, а за плоть под ней." },
-  { id: 125, speaker: "Кирилл", actionText: "пауза, взгляд неотрывный", text: "Стань моей сегодня ночью, Валерия. Не ради завтра. Не ради обещаний." },
-  { id: 126, speaker: "Кирилл", text: "Ради того, чтобы доказать самой себе: даже богини иногда сходят с трона — не чтобы пасть, а чтобы почувствовать песок под босыми ногами." },
-  { id: 127, speaker: "Валерия", actionText: "долгая пауза. Она опускает взгляд на секунду, затем снова смотрит на него", text: "Ты опасен, Кирилл." },
-  { id: 128, speaker: "Валерия", text: "Не потому что обаятелен. А потому что понимаешь меня лучше, чем я хочу признать." },
-  { id: 129, speaker: "Валерия", text: "Ты играешь опасно. Потому что если я соглашусь — я перестану быть недосягаемой." },
-  { id: 130, speaker: "Валерия", text: "А если откажу — ты запомнишь меня как трусиху." },
-
-  // 🔸 ФИНАЛЬНАЯ ТОЧКА ВЫБОРА
-  {
-    id: 131,
-    type: "choice",
-    text: "Что скажешь ему?",
-    choices: [
-      { label: "«Хорошо. Но запомни: я не отдаю себя. Я позволяю тебе увидеть меня. Разница колоссальна. И если ты забудешь её хотя бы на секунду — я исчезну с этого пляжа раньше, чем взойдёт солнце.»", path: "end_agree" },
-      { label: "«Веди. Но если твои руки окажутся менее умелыми, чем твой язык — я оставлю тебя одного слушать прибой. А сама уйду с улыбкой на губах.»", path: "end_agree" },
-      { label: "«Ты почти заставил меня поверить, что одиночество — слабость. Почти. Но совершенство не делится. Оно существует. И точка. Прощай, Кирилл. Ты был прекрасной иллюзией — но иллюзиями я больше не соблазняюсь.»", path: "end_reject" }
-    ]
-  },
-
-  // 🌊 КОНЕЦ 1: СОГЛАСИЕ
-  { id: 132, path: "end_agree", speaker: "Кирилл", actionText: "не улыбается. В его глазах — что-то похожее на трепет", text: "Я не забуду разницу." },
-  { id: 133, path: "end_agree", speaker: "Кирилл", text: "Потому что позволение — ценнее владения." },
-  { id: 134, path: "end_agree", speaker: "Кирилл", text: "А ты… ты ценнее всего, что я видел." },
-  { id: 135, path: "end_agree", speaker: "Кирилл", actionText: "Не тянет её за руку. Ждёт — и она сама делает шаг вперёд. Первый и последний уступок этой ночи.", text: "" },
-  { id: 136, path: "end_agree", speaker: "Валерия", text: "Веди. Но помни: эта ночь не делает тебя моим." },
-  { id: 137, path: "end_agree", speaker: "Валерия", text: "Она лишь доказывает, что иногда даже я допускаю исключения." },
-  { id: 138, path: "end_agree", speaker: "Валерия", actionText: "кладёт ладонь на его, не отводя взгляда", text: "Попробуй не разочаровать меня, Кирилл." },
-  { id: 139, path: "end_agree", speaker: "Валерия", text: "Это будет твоим главным достижением." },
-  { id: 140, path: "end_agree", text: "Они выходят в ночь. За спиной — бар с его зеркалами и огнями.", speaker: "" },
-  { id: 141, path: "end_agree", text: "Впереди — тёмная дорога к пляжу, где луна уже рисует серебряную дорожку по воде.", speaker: "" },
-  { id: 142, path: "end_agree", text: "Два совершенства, наконец решившиеся проверить: может ли эго раствориться в другом эго — не теряя себя.", speaker: "" },
-
-  // 🌑 КОНЕЦ 2: ОТКАЗ
-  { id: 143, path: "end_reject", speaker: "Кирилл", actionText: "рука опускается. Он не смотрит ей вслед — смотрит в окно, на своё отражение", text: "Значит, ты не боишься меня. Ты боишься признать: даже тебе иногда хочется снять корону." },
-  { id: 144, path: "end_reject", speaker: "Кирилл", text: "Не ради кого-то. А ради ощущения — каково это, быть просто женщиной под луной." },
-  { id: 145, path: "end_reject", speaker: "Валерия", actionText: "берёт сумочку. Движения точны, без дрожи", text: "Хочу — не значит позволяю." },
-  { id: 146, path: "end_reject", speaker: "Валерия", text: "Я не торгуюсь со своими принципами. Даже ради ночи, которая обещает быть идеальной." },
-  { id: 147, path: "end_reject", speaker: "Валерия", actionText: "у двери, останавливается на миг", text: "Нет. Я выбираю оставаться той, кого не нужно понимать. Прощай, Кирилл." },
-  { id: 148, path: "end_reject", speaker: "Кирилл", text: "Идеальность — не в том, чтобы никогда не снимать корону. А в том, чтобы знать — когда это безопасно." },
-  { id: 149, path: "end_reject", speaker: "Кирилл", text: "Ты упускаешь шанс понять разницу." },
-  { id: 150, path: "end_reject", text: "Дверь закрывается без звука. Кирилл остаётся один.", speaker: "" },
-  { id: 151, path: "end_reject", text: "И впервые за много ночей он не видит в отражении победителя. Он видит человека, который подошёл к границе другого мира — и не смог переступить.", speaker: "" }
-];
-
-    class RomanceStoryBackend {
-      constructor(tree) {
-        this.tree = tree;
-        this.currentIndex = 0;
-        this.currentPath = null;
-      }
-
-      getCurrentNode() {
-        const node = this.tree[this.currentIndex];
-        if (node.path && node.path !== this.currentPath) {
-          this.currentIndex++;
-          return this.getCurrentNode();
+        // Функция запуска игры (скрывает меню)
+        function startGame() {
+            mainMenu.classList.add('hidden');
+            setTimeout(() => {
+                processStep('start');
+            }, 500);
         }
-        return node;
-      }
 
-      nextLine() {
-        if (this.currentIndex >= this.tree.length - 1) return null;
-        const currentNode = this.getCurrentNode();
-        if (currentNode.type === "choice") return currentNode;
-        this.currentIndex++;
-        return this.getCurrentNode();
-      }
+        const script = {
+            'start': {
+                type: 'choice',
+                options: [
+                    { text: "«Привет. Анализ показал: ты не отвечала 120 часов. Это аномалия даже для твоего графика.»", desc: "😎 Сухое / Аналитическое", type: 'ego', next: 'lera_reply_dry' },
+                    { text: "«Здарова. Твоя клиника ещё не обанкротилась без твоих гениальных маркетинговых ходов? Или я просто не в курсе?»", desc: "😏 Странное", type: 'ego', next: 'lera_reply_weird' },
+                    { text: "«Привет. Смотрю на календарь и понимаю: среда слишком уныла и сера для такой ослепительной личности, как ты. Твои пациенты не заслуживают тебя в таком настроении.»", desc: "💖 Горячее", type: 'love', next: 'lera_reply_hot' }
+                ]
+            },
+            'lera_reply_dry': { type: 'msg', sender: 'her', text: "Твой анализ неточен. Я отвечала коллеге в общем чате. Но засчитываю попытку.", delay: 3000, next: 'lera_window' },
+            'lera_reply_weird': { type: 'msg', sender: 'her', text: "Клиника работает без перебоев. А вот твои шутки иногда дают сбой.", delay: 3000, next: 'lera_window' },
+            'lera_reply_hot': { type: 'msg', sender: 'her', text: "Пациенты меня не видят, я в бэк-офисе. Но комплимент принят.", delay: 3000, next: 'lera_window' },
+            
+            'lera_window': { type: 'msg', sender: 'her', text: "К чему ты клонишь, Кирилл? У меня окно между звонками ровно 5 минут.", delay: 2000, next: 'lera_presentation' },
+            'lera_presentation': { type: 'msg', sender: 'her', text: "Готовлю презентацию для совета директоров клиники. Тема: «Увеличение LTV пациента через косметологию».", delay: 2000, next: 'lera_seconds' },
+            'lera_seconds': { type: 'msg', sender: 'her', text: "Так что у меня сейчас каждая секунда на учете.", delay: 2000, next: 'choice_reaction' },
 
-      selectChoice(index) {
-        if (this.tree[this.currentIndex].type !== "choice") return;
-        const choice = this.tree[this.currentIndex].choices[index];
-        if (choice) {
-          this.currentPath = choice.path;
-          this.currentIndex++;
+            'choice_reaction': {
+                type: 'choice',
+                options: [
+                    { text: "«Совет директоров? Звучит серьёзно. Значит, ты там не просто картинки рисуешь.»", desc: "😎 С интересом", type: 'ego', next: 'lera_invitation' },
+                    { text: "«Ты справишься. Ты всегда справляешься. Но даже супергероям нужен перерыв.»", desc: "💖 С поддержкой", type: 'love', next: 'lera_invitation' },
+                ]
+            },
+
+            'block_1': {
+                type: 'block',
+                reason: "Вы оскорбили её профессиональную гордость. Лера не прощает неуважения к своей работе.",
+                messages: [
+                    { sender: 'system', text: "Сообщение прочитано" },
+                    { sender: 'her', text: "Ты только что обесценил полгода моей работы.", delay: 3000 },
+                    { sender: 'her', text: "Маркетинг в клинике — это не «слайды». Это привлечение пациентов, репутация, доходы. Но тебе этого не понять." },
+                    { sender: 'her', text: "У меня нет времени на людей, которые не уважают мою профессию." }
+                ]
+            },
+
+            'lera_invitation': { type: 'msg', sender: 'her', text: "Ладно, проехали. У меня ещё 3 минуты. Что ты хотел?", delay: 2000, next: 'lera_call' },
+            'lera_call': { type: 'msg', sender: 'her', text: "Только быстро. У меня через 10 минут созвон с главврачом. Он сложный человек.", delay: 2000, next: 'lera_doctor' },
+            'lera_doctor': { type: 'msg', sender: 'her', text: "Любит, когда ему перечят, но ненавидит, когда ошибаются в цифрах.", delay: 2000, next: 'choice_approach' },
+            
+            'choice_approach': {
+                type: 'choice',
+                options: [
+                    { text: "«Четверг. Ужин. 20:00. Я знаю место рядом с твоей клиникой.»", desc: "😎 Прямой", type: 'ego', next: 'lera_kpi' },
+                    { text: "«Хотел предложить тебе вечер без презентаций и отчётов. Только ты, я и хорошая еда.»", desc: "💖 Мягкий", type: 'love', next: 'lera_kpi' },
+                    { text: "«Я проанализировал твоё расписание. Четверг — наименее загруженный день. Я забронировал стол. Не заставляй меня менять планы.»", desc: "💎 Премиум (15💎)", type: 'ego', premium: 15, next: 'lera_analyzed' }
+                ]
+            },
+
+            'lera_kpi': { type: 'msg', sender: 'her', text: "Четверг? У меня совещание по запуску новой кампании. Клиника открывает отделение косметологии — нужно привлечь аудиторию.", delay: 3000, next: 'lera_kpi_2' },
+            'lera_kpi_2': { type: 'msg', sender: 'her', text: "Но Кирилл, я не могу просто так уйти. У меня KPI, отчёты, брифинги с врачами.", delay: 2000, next: 'lera_flow' },
+            'lera_flow': { type: 'msg', sender: 'her', text: "Ты понимаешь, что я отвечаю за поток пациентов? Если я уйду раньше, воронка продаж может рухнуть.", delay: 2000, next: 'lera_priority' },
+            'lera_priority': { type: 'msg', sender: 'her', text: "Это не просто ужин. Это вопрос приоритетов.", delay: 2000, next: 'choice_argument' },
+            'lera_analyzed': { type: 'msg', sender: 'her', text: "Ты проанализировал моё расписание? Это немного жутко. Но... точно. Четверг у меня свободнее. Но Кирилл, я не могу просто так уйти. У меня KPI, отчёты, брифинги с врачами.", delay: 3000, next: 'lera_flow' },
+
+            'choice_argument': {
+                type: 'choice',
+                options: [
+                    { text: "«Именно поэтому тебе нужно отдохнуть. Выгоревший маркетолог = плохие KPI. Я забочусь о твоих показателях.»", desc: "😎 Через работу", type: 'ego', next: 'lera_details' },
+                    { text: "«Поток пациентов не иссякнет за один вечер. А ты можешь иссякнуть. Позаботься о себе.»", desc: "💖 Через заботу", type: 'love', next: 'lera_details' },
+                    { text: "«Думаешь, не справишься? Я думал, ты лучше. Один вечер не сделает погоду в твоей клинике.»", desc: "😏 Через конкуренцию", type: 'soft', next: 'block_2' }
+                ]
+            },
+
+            'block_2': {
+                type: 'block',
+                reason: "Вы поставили под сомнение её компетентность. Лера не терпит манипуляций через работу.",
+                messages: [
+                    { sender: 'her', text: "Ты пытаешься меня задеть? Это низко.", delay: 2000 },
+                    { sender: 'her', text: "Я не доказываю тебе свою эффективность. У меня есть реальные цифры и результаты." },
+                    { sender: 'her', text: "Вечер отменяется. Найди девушку, которой нужно доказывать, что она хороша." }
+                ]
+            },
+
+            'lera_details': { type: 'msg', sender: 'her', text: "Ладно, убедишь. Но я хочу детали.", delay: 3000, next: 'lera_location' },
+            'lera_location': { type: 'msg', sender: 'her', text: "Куда именно ты ведёшь? Если это шумное место — я откажусь. После работы я хочу тишины.", delay: 2000, next: 'lera_food' },
+            'lera_food': { type: 'msg', sender: 'her', text: "И никакого фастфуда. Я слежу за питанием перед важными встречами.", delay: 2000, next: 'lera_appearance' },
+            'lera_appearance': { type: 'msg', sender: 'her', text: "В клинике все смотрят на внешний вид. Я не могу позволить себе выглядеть хуже партнера.", delay: 2000, next: 'choice_place' },
+
+            'choice_place': {
+                type: 'choice',
+                options: [
+                    { text: "«Ресторан на крыше Nebula. Вид на город, приватные зоны. Там бывают люди, которые принимают решения. Может, пригодится для клиники.»", desc: "😎 Статусное", type: 'ego', next: 'lera_nebula' },
+                    { text: "«Маленький итальянский дворик в центре. Никого лишнего. Только свет фонарей, вино и возможность выдохнуть.»", desc: "💖 Уютное", type: 'love', next: 'lera_courtyard' },
+                    { text: "«Шеф-повар готовит персональное меню. Я сказал, что придёшь ты — он уже начал готовить. Это честь для него.»", desc: "💎 Премиум (20💎)", type: 'love', premium: 20, next: 'lera_exclusive' }
+                ]
+            },
+
+            'lera_nebula': { type: 'msg', sender: 'her', text: "Nebula? Я читала о них. Там сложно попасть без брони. Ты серьёзно забронировал?", delay: 3000, next: 'lera_condition' },
+            'lera_courtyard': { type: 'msg', sender: 'her', text: "Звучит... приятно. Мне нужно именно это. Тишина.", delay: 3000, next: 'lera_condition' },
+            'lera_exclusive': { type: 'msg', sender: 'her', text: "Ты преувеличиваешь. Но мне льстит. Ладно, место принято.", delay: 3000, next: 'lera_condition' },
+            'lera_condition': { type: 'msg', sender: 'her', text: "Но есть условие. 20:00 — это жёстко. Я могу задержаться на совещании. Врачи любят говорить дольше запланированного.", delay: 2000, next: 'lera_surgeon' },
+            'lera_surgeon': { type: 'msg', sender: 'her', text: "Особенно главный хирург. Он любит слушать себя.", delay: 2000, next: 'lera_late' },
+            'lera_late': { type: 'msg', sender: 'her', text: "Что будем делать, если я опоздаю на 15 минут?", delay: 2000, next: 'choice_delay' },
+
+            'choice_delay': {
+                type: 'choice',
+                options: [
+                    { text: "«20:00. Я не люблю ждать. Даже тебя. Постарайся не опаздывать.»", desc: "😎 Жёсткий", type: 'ego', next: 'lera_photo_req' },
+                    { text: "«Напиши, если задержишься. Я закажу вино и подожду. Никуда не тороплюсь.»", desc: "💖 Гибкий", type: 'love', next: 'lera_photo_req' },
+                    { text: "«Каждые 10 минут опоздания — один вопрос, на который ты должна честно ответить. Согласна?»", desc: "😏 С игрой", type: 'ego', next: 'lera_photo_req' }
+                ]
+            },
+
+            'lera_photo_req': {
+                type: 'branch',
+                logic: (prev) => {
+                    if(prev.includes("Жёсткий")) return "Давишь с самого начала? Интересно...";
+                    if(prev.includes("Гибкий")) return "Спасибо. Это... приятно.";
+                    return "Ты всегда всё превращаешь в игру? Ладно. Принято.";
+                },
+                next: 'lera_photo_req_2'
+            },
+            'lera_photo_req_2': { type: 'msg', sender: 'her', text: "Кстати, я хочу видеть, во что ты планируешь одеться.", delay: 2000, next: 'lera_reputation' },
+            'lera_reputation': { type: 'msg', sender: 'her', text: "Не хочу прийти в ресторан, а ты будешь в худи и кроссовках. У меня репутация.", delay: 2000, next: 'lera_clinic' },
+            'lera_clinic': { type: 'msg', sender: 'her', text: "В клинике все смотрят на внешний вид. Я не могу позволить себе выглядеть хуже партнера.", delay: 2000, next: 'lera_now' },
+            'lera_now': { type: 'msg', sender: 'her', text: "скинь фото. Прямо сейчас.", delay: 2000, next: 'choice_photo' },
+
+            'choice_photo': {
+                type: 'choice',
+                options: [
+                    { text: "📸 Отправить фото костюма", desc: "😎 Классика", type: 'ego', image: 'https://images.unsplash.com/photo-1594938298603-c8148c47e356?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', next: 'lera_reply_suit' },
+                    { text: "🤳 Отправить селфи", desc: "💖 Личное", type: 'love', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', next: 'lera_reply_selfie' },
+                    { text: "«Представь что-то дорогое. Тёмное. Сидит идеально. Твоей фантазии хватит.»", desc: "😏 Текст", type: 'soft', next: 'lera_text_dodge' },
+                    { text: "🎥 Отправить видео (25💎)", desc: "💎 Премиум", type: 'love', premium: 25, image: 'https://media.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif', next: 'lera_reply_video' }
+                ]
+            },
+
+            'lera_reply_suit': { type: 'msg', sender: 'her', text: "Неплохо. Я планировала вот это.", image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', delay: 3000, next: 'lera_tie' },
+            'lera_tie': { type: 'msg', sender: 'her', text: "Чёрное. В тон тебе. Но галстук выбери другой. Синий будет лучше. Он подчеркнёт глаза.", delay: 2000, next: 'lera_fire' },
+            'lera_fire': { type: 'msg', sender: 'her', text: "🔥", delay: 2000, next: 'lera_work_chat' },
+
+            'lera_reply_selfie': { type: 'msg', sender: 'her', text: "Хм. Выглядишь... презентабельно.", delay: 3000, next: 'lera_shoes' },
+            'lera_shoes': { type: 'msg', sender: 'her', text: "Тогда я буду в этом. Чтобы соответствовать.", image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', delay: 2000, next: 'lera_heels' },
+            'lera_heels': { type: 'msg', sender: 'her', text: "Каблуки 10 см. Готова?", delay: 2000, next: 'lera_kiss' },
+            'lera_kiss': { type: 'msg', sender: 'her', text: "😘", delay: 2000, next: 'lera_work_chat' },
+
+            'lera_reply_video': { type: 'msg', sender: 'her', text: "Вау. Живая демонстрация. Чтобы ты не сомневалась.", delay: 3000, next: 'lera_work_chat' },
+
+            'lera_text_dodge': { type: 'msg', sender: 'her', text: "Ты опять уходишь от ответа? Знаешь, это начинает напоминать игру в прятки. Мне не нравится.", delay: 2000, next: 'choice_fix' },
+            'choice_fix': {
+                type: 'choice',
+                options: [
+                    { text: "«Ладно. Держи.» (Отправляет фото)", desc: "Исправиться", type: 'ego', image: 'https://images.unsplash.com/photo-1594938298603-c8148c47e356?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', next: 'lera_reply_suit' },
+                    { text: "«Доверься мне. Сюрприз важнее.»", desc: "Настоять", type: 'soft', next: 'block_3' }
+                ]
+            },
+
+            'block_3': {
+                type: 'block',
+                reason: "Лера ценит прозрачность. Вы создали ненужное напряжение.",
+                messages: [
+                    { sender: 'her', text: "Всё. Я устала.", delay: 2000 },
+                    { sender: 'her', text: "Ты не можешь дать простую вещь — фото. Что скрываешь?" },
+                    { sender: 'her', text: "Вечер отменяется. Не пиши." }
+                ]
+            },
+
+            'lera_work_chat': { type: 'msg', sender: 'her', text: "Хорошо. Теперь я спокойна.", delay: 2000, next: 'lera_moment' },
+            'lera_moment': { type: 'msg', sender: 'her', text: "Но есть ещё один момент.", delay: 2000, next: 'lera_chat_img' },
+            'lera_chat_img': { type: 'msg', sender: 'her', text: "Вот мой вечер. Врачи, администрация, подрядчики. Все что-то хотят.", image: 'https://images.unsplash.com/photo-1616353071588-708cc01a3a14?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80', delay: 2000, next: 'lera_switch' },
+            'lera_switch': { type: 'msg', sender: 'her', text: "Ты уверен, что сможешь переключить меня с этого на... нас?", delay: 2000, next: 'lera_hard' },
+            'lera_hard': { type: 'msg', sender: 'her', text: "Это будет сложно. Я привыкла быть в режиме работы.", delay: 2000, next: 'choice_final_arg' },
+
+            'choice_final_arg': {
+                type: 'choice',
+                options: [
+                    { text: "«Я аналитик. Я просчитываю риски. Риск того, что тебе не понравится — менее 3%. Я не ошибаюсь.»", desc: "😎 Уверенность", type: 'ego', next: 'lera_final_ego' },
+                    { text: "«Цифры — это моя работа. А с тобой я хочу быть не аналитиком. Просто мужчиной, который хочет увидеть тебя.»", desc: "💖 Эмоции", type: 'love', next: 'lera_final_love' },
+                    { text: "«Я уже отменил все свои встречи на четверг. Ты — единственный приоритет. Это статистически значимо.»", desc: "💎 Романтика (18💎)", type: 'love', premium: 18, next: 'lera_final_premium' }
+                ]
+            },
+
+            'lera_final_ego': { type: 'msg', sender: 'her', text: "3%? Ты оставил место на ошибку? Это неожиданно честно.", delay: 3000, next: 'lera_come_ego' },
+            'lera_come_ego': { type: 'msg', sender: 'her', text: "Ладно. Я приду. Но если всё пройдёт плохо — твои проценты упадут.", delay: 2000, next: 'lera_wink' },
+            'lera_wink': { type: 'msg', sender: 'her', text: "😏", delay: 2000, next: 'choice_transport' },
+            'lera_final_love': { type: 'msg', sender: 'her', text: "Это... красиво. Ты редко говоришь так.", delay: 3000, next: 'lera_come_love' },
+            'lera_come_love': { type: 'msg', sender: 'her', text: "Я приду. И я постараюсь забыть про работу.", delay: 2000, next: 'lera_heart' },
+            'lera_heart': { type: 'msg', sender: 'her', text: "❤️", delay: 2000, next: 'choice_transport' },
+            'lera_final_premium': { type: 'msg', sender: 'her', text: "Ты отменил встречи ради меня?", delay: 3000, next: 'lera_come_premium' },
+            'lera_come_premium': { type: 'msg', sender: 'her', text: "Это много значит. Спасибо, Кирилл. Я буду.", delay: 3000, next: 'lera_love_heart' },
+            'lera_love_heart': { type: 'msg', sender: 'her', text: "💖", delay: 2000, next: 'choice_transport' },
+
+            'choice_transport': {
+                type: 'choice',
+                options: [
+                    { text: "«Я заеду. 19:50 у главного входа. Не заставляй себя ждать.»", desc: "😎 Я заберу", type: 'ego', next: 'lera_transport_1' },
+                    { text: "«Как тебе удобнее. Могу заехать, могу встретить у ресторана.»", desc: "💖 Гибкость", type: 'love', next: 'lera_transport_2' },
+                    { text: "«Машина уже будет ждать. Водитель знает тебя в лицо. Тебе не нужно ни о чём думать.»", desc: "💎 Трансфер (22💎)", type: 'love', premium: 22, next: 'lera_transport_3' }
+                ]
+            },
+
+            'lera_transport_1': { type: 'msg', sender: 'her', text: "19:50. Запомнил? Я не люблю ждать на улице.", delay: 2000, next: 'lera_presentation_end' },
+            'lera_transport_2': { type: 'msg', sender: 'her', text: "Заедь. Так лучше.", delay: 2000, next: 'lera_presentation_end' },
+            'lera_transport_3': { type: 'msg', sender: 'her', text: "Ты серьёзно? Водитель? Кирилл... Это излишне. Но приятно.", delay: 2000, next: 'lera_presentation_end' },
+            'lera_presentation_end': { type: 'msg', sender: 'her', text: "Всё. Мне нужно возвращаться к презентации.", delay: 2000, next: 'lera_sticker' },
+
+            'lera_sticker': { type: 'msg', sender: 'her', text: "🍷 До встречи", delay: 2000, next: 'kirill_final' },
+            'kirill_final': { type: 'msg', sender: 'me', text: "Не опоздаю. И Lera... Ты выглядела прекрасно на фото.", delay: 1500, next: 'lera_emoji' },
+            'lera_emoji': { type: 'msg', sender: 'her', text: "😘", delay: 3000, next: 'lera_hearts' },
+            'lera_hearts': { type: 'msg', sender: 'her', text: "❤️❤️❤️", delay: 3000, next: 'check_ending' },
+
+            'check_ending': { type: 'end_check' }
+        };
+
+        function renderMessage(msgData, visible = false) {
+            if (msgData.sender === 'system') {
+                const row = document.createElement('div');
+                row.style.textAlign = 'center';
+                row.style.fontSize = '10px';
+                row.style.color = '#666';
+                row.style.margin = '10px 0';
+                row.innerText = msgData.text;
+                chatArea.appendChild(row);
+                scrollToBottom();
+                return;
+            }
+
+            const row = document.createElement('div');
+            row.className = `message-row ${msgData.sender === 'me' ? 'sent' : 'received'} ${msgData.image ? 'image-msg' : ''}`;
+            
+            let nameHtml = '';
+            if (msgData.sender === 'her') {
+                nameHtml = `<div class="sender-name">Lera</div>`;
+            }
+
+            let contentHtml = msgData.text ? `<div class="bubble ${msgData.sender === 'me' ? 'sent' : 'received'}">${msgData.text}</div>` : '';
+            
+            if (msgData.image) {
+                if (!contentHtml) contentHtml = `<div class="bubble ${msgData.sender === 'me' ? 'sent' : 'received'}"></div>`;
+                const imgHtml = `<img src="${msgData.image}" alt="photo">`;
+                if(msgData.sender === 'me') {
+                     contentHtml = `<div class="bubble sent">${imgHtml}${msgData.text ? '<br>'+msgData.text : ''}</div>`;
+                } else {
+                     contentHtml = `<div class="bubble received">${msgData.text ? msgData.text+'<br>' : ''}${imgHtml}</div>`;
+                }
+            }
+
+            row.innerHTML = `
+                ${nameHtml}
+                ${contentHtml}
+                <span class="time">${getCurrentTime()}</span>
+            `;
+            
+            chatArea.appendChild(row);
+            if (visible) {
+                setTimeout(() => row.classList.add('visible'), 50);
+            }
+            scrollToBottom();
         }
-      }
 
-      reset() {
-        this.currentIndex = 0;
-        this.currentPath = null;
-      }
-    }
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+        }
 
-    // Инициализация
-    const backend = new RomanceStoryBackend(dialogueTree);
+        function scrollToBottom() {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
 
-    const kirillEl = document.getElementById("kirill");
-    const valeriaEl = document.getElementById("valeria");
-    const kirillImg = document.getElementById("kirill-img");
-    const valeriaImg = document.getElementById("valeria-img");
-    const backgroundEl = document.getElementById("background");
-    const dialogBubble = document.getElementById("dialog-bubble");
-    const speakerNameEl = document.getElementById("speaker-name");
-    const dialogTextEl = document.getElementById("dialog-text");
-    const choiceContainer = document.getElementById("choices");
+        function showTyping(show) {
+            typingIndicator.style.display = show ? 'block' : 'none';
+            if(show) scrollToBottom();
+        }
 
-    const btnBack = document.getElementById("btn-back");
-    const btnPause = document.getElementById("btn-pause");
+        function showChoices(options) {
+            choicesContainer.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `choice-btn ${opt.premium ? 'premium' : ''}`;
+                
+                let icon = '';
+                if(opt.image) icon = '📸 ';
+                
+                btn.innerHTML = `
+                    ${icon}${opt.text}
+                    <span class="choice-desc">${opt.desc}</span>
+                `;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    handleChoice(opt);
+                };
+                choicesContainer.appendChild(btn);
+            });
+            choicesContainer.classList.add('active');
+            isProcessing = false;
+        }
 
-    // Кнопка "Начать"
-    document.getElementById("start-btn").addEventListener("click", () => {
-      document.getElementById("splash-screen").classList.add("hidden");
-      document.getElementById("main-content").classList.add("active");
-      // Инициализация изображений и запуск диалога
-      backgroundEl.style.backgroundImage = `url('${IMAGE_CONFIG.backgroundUrl}')`;
-      kirillImg.src = IMAGE_CONFIG.kirillUrl;
-      valeriaImg.src = IMAGE_CONFIG.valeriaUrl;
-      updateDialog();
-    });
+        function hideChoices() {
+            choicesContainer.classList.remove('active');
+        }
 
-    function updateDialog() {
-      const node = backend.getCurrentNode();
+        function triggerBlock(reason, messages) {
+            let i = 0;
+            function playNext() {
+                if (i >= messages.length) {
+                    phoneFrame.classList.add('blocked');
+                    statusText.innerText = "Был(а) недавно";
+                    blockReasonText.innerText = reason;
+                    isProcessing = false;
+                    return;
+                }
+                
+                const msg = messages[i];
+                if (msg.sender === 'her') {
+                    showTyping(true);
+                    setTimeout(() => {
+                        showTyping(false);
+                        renderMessage(msg, true);
+                        i++;
+                        setTimeout(playNext, msg.delay || 1500); 
+                    }, msg.delay || 1500);
+                }
+            }
+            playNext();
+        }
 
-      if (!node) {
-        speakerNameEl.textContent = "Конец";
-        dialogTextEl.textContent = "Спасибо, что были с нами.";
-        choiceContainer.style.display = "none";
-        kirillEl.classList.remove("lit", "dim");
-        valeriaEl.classList.remove("lit", "dim");
-        return;
-      }
+        async function processQueue() {
+            if (isProcessing || messageQueue.length === 0) return;
+            
+            isProcessing = true;
+            
+            while (messageQueue.length > 0 && isProcessing) {
+                const item = messageQueue.shift();
+                
+                if (item.type === 'choice') {
+                    showChoices(item.options);
+                    return;
+                }
 
-      // Освещение
-      kirillEl.classList.remove("lit", "dim");
-      valeriaEl.classList.remove("lit", "dim");
+                if (item.type === 'block') {
+                    triggerBlock(item.reason, item.messages);
+                    return;
+                }
 
-      if (node.speaker === "Кирилл") {
-        kirillEl.classList.add("lit");
-        valeriaEl.classList.add("dim");
-      } else if (node.speaker === "Валерия") {
-        valeriaEl.classList.add("lit");
-        kirillEl.classList.add("dim");
-      }
+                if (item.type === 'branch') {
+                    if (item.logic) {
+                        const text = item.logic(lastChoiceText);
+                        renderMessage({ sender: 'her', text: text }, true);
+                        await sleep(1000);
+                    }
+                    if(item.next) processStep(item.next);
+                    return;
+                }
 
-      if (node.type === "choice") {
-        speakerNameEl.textContent = "Выбор";
-        dialogTextEl.textContent = node.text;
-        choiceContainer.innerHTML = '';
-        node.choices.forEach((choice, i) => {
-          const btn = document.createElement("button");
-          btn.className = "choice-btn";
-          btn.textContent = choice.label;
-          btn.onclick = () => {
-            backend.selectChoice(i);
-            choiceContainer.style.display = "none";
-            updateDialog();
-          };
-          choiceContainer.appendChild(btn);
-        });
-        choiceContainer.style.display = "block";
-        return;
-      }
+                if (item.type === 'end_check') {
+                    showEnding();
+                    return;
+                }
 
-      choiceContainer.style.display = "none";
-      speakerNameEl.textContent = node.speaker || "";
+                if (item.type === 'end') {
+                    isProcessing = false;
+                    return;
+                }
 
-      // Сбор текста: actionText (курсив) + text (обычный)
-      let html = "";
-      if (node.actionText) {
-        html += `<em>${node.actionText}</em>`;
-        if (node.text) html += "\n";
-      }
-      if (node.text) {
-        html += node.text;
-      }
-      dialogTextEl.innerHTML = html;
+                if (item.sender === 'her') {
+                    showTyping(true);
+                    await sleep(item.delay || 2000);
+                    showTyping(false);
+                    renderMessage(item, true);
+                    await sleep(500);
+                } else {
+                    renderMessage(item, true);
+                    await sleep(1000);
+                }
+            }
+            
+            isProcessing = false;
+        }
 
-      // Эффекты
-      if (node.actionText) {
-        dialogBubble.style.boxShadow = "0 0 25px rgba(255, 215, 0, 0.6)";
-        setTimeout(() => dialogBubble.style.boxShadow = "", 1000);
-      } else {
-        dialogBubble.style.boxShadow = "0 8px 30px rgba(0, 0, 0, 0.5)";
-      }
-    }
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
-    document.addEventListener("click", (e) => {
-      if (!document.getElementById("main-content").classList.contains("active")) return;
-      if (e.target.closest(".control-btn")) return;
-      if (e.target.classList.contains("choice-btn")) return;
-      if (choiceContainer.style.display === "block") return;
+        function handleChoice(option) {
+            lastChoiceType = option.type;
+            choiceHistory.push(option.type);
+            lastChoiceText = option.text;
+            
+            if (option.type === 'love') stats.love += 1;
+            if (option.type === 'ego') stats.ego += 1;
+            if (option.premium) {
+                stats.diamonds += option.premium;
+                stats.love += 1;
+                stats.ego += 1;
+            }
 
-      backend.nextLine();
-      updateDialog();
-    });
+            hideChoices();
+            
+            let displayText = option.text.replace(/[«»]/g, '');
+            if(option.image) displayText = "📸 Фото отправлено";
+            
+            renderMessage({ 
+                text: displayText, 
+                sender: "me",
+                image: option.image
+            }, true);
+            
+            setTimeout(() => {
+                processStep(option.next);
+            }, 800);
+        }
 
-    btnBack.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (backend.currentIndex > 0) {
-        backend.currentIndex--;
-        updateDialog();
-      }
-    });
+        function processStep(stepId) {
+            const step = script[stepId];
+            if (!step) return;
 
-    btnPause.addEventListener("click", (e) => {
-      e.stopPropagation();
-      btnPause.textContent = btnPause.textContent === "⏸" ? "▶" : "⏸";
-    });
-  </script>
+            if (step.type === 'msg' || step.type === 'branch') {
+                messageQueue = [step];
+                if (step.next) {
+                    loadChain(step.next);
+                }
+            } else if (step.type === 'choice' || step.type === 'block' || step.type === 'end_check') {
+                messageQueue = [step];
+            }
+            
+            processQueue();
+        }
+
+        function loadChain(startId) {
+            let currentId = startId;
+            
+            while(currentId) {
+                const step = script[currentId];
+                if (!step) break;
+                
+                messageQueue.push(step);
+                
+                if (step.type === 'choice' || step.type === 'block' || step.type === 'branch' || step.type === 'end_check' || step.type === 'end') {
+                    break;
+                }
+                
+                currentId = step.next;
+            }
+        }
+
+        function showEnding() {
+            const loveCount = choiceHistory.filter(c => c === 'love').length;
+            const egoCount = choiceHistory.filter(c => c === 'ego').length;
+            
+            if (loveCount > egoCount + 2) {
+                setTimeout(() => {
+                    triggerBlock("Лера уважает силу. Излишняя мягкость была воспринята как слабость.", [
+                        { sender: 'her', text: "Ты сегодня какой-то... другой.", delay: 3000 },
+                        { sender: 'her', text: "Мне нравится уверенность. А ты слишком подстраиваешься." },
+                        { sender: 'her', text: "Знаешь, я передумала. Мне нужен кто-то, кто знает, чего хочет." },
+                        { sender: 'her', text: "Не пиши мне." }
+                    ]);
+                }, 1000);
+                return;
+            }
+
+            setTimeout(() => {
+                finalStatsScreen.classList.add('visible');
+                document.getElementById('statLove').innerText = stats.love;
+                document.getElementById('statEgo').innerText = stats.ego;
+                document.getElementById('statDiamonds').innerText = stats.diamonds;
+                
+                if (stats.love >= 3 && stats.ego >= 2) {
+                    document.getElementById('achievementBox').style.display = 'block';
+                } else {
+                    document.getElementById('achievementBox').style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        setInterval(() => {
+            const now = new Date();
+            clock.innerText = now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+        }, 1000);
+
+        // Игра НЕ запускается автоматически - ждём нажатия кнопки в меню
+        // window.onload больше не вызывает processStep('start');
+    </script>
 </body>
 </html>
